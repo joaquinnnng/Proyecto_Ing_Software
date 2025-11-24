@@ -1,12 +1,8 @@
 import 'dart:convert';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
-import 'usuarioUdec.dart';
-import 'helpers/guarda_txt_web.dart';
-import 'package:sistema_objetos_perdidos/helpers/guarda_txt_web.dart';
-import 'package:flutter/material.dart';
-import 'usuarioUdec.dart';
-import 'helpers/guarda_txt_web.dart'; // debe exportar: Future<void> saveUserTxt(Usuarioudec user)
+import '../usuarioUdec.dart';
+//import 'helpers/guarda_txt_web.dart'; // debe exportar: Future<void> saveUserTxt(Usuarioudec user)
 
 class FormularioRegistro extends StatefulWidget {
   const FormularioRegistro({super.key});
@@ -29,7 +25,7 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
   //validaciones necesarias
   String? _required(String? n, {String label = 'Este campo'}) {
     if (n == null || n.trim().isEmpty) {
-      return '$label es obligatorio'; 
+      return '$label es obligatorio';
     }
     return null;
   }
@@ -56,14 +52,15 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
     return null;
   }
 
-  Future<void> saveUserTxt(Usuarioudec user) async{
-    final linea = '${user.nombre}, ${user.correo}, ${user.telefono}, ${user.matricula}, admin=${user.admin}';
-    
+  Future<void> saveUserTxt(Usuarioudec user) async {
+    final linea =
+        '${user.nombre}, ${user.correo}, ${user.telefono}, ${user.matricula}, admin=${user.admin}';
+
     final bytes = utf8.encode(linea);
     final blob = html.Blob([bytes], 'text/plain');
     final url = html.Url.createObjectUrlFromBlob(blob);
 
-    final a = html.AnchorElement(href: url) 
+    final a = html.AnchorElement(href: url)
       ..download = 'usuarios.txt'
       ..style.display = 'none';
     html.document.body!.children.add(a);
@@ -71,7 +68,6 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
     a.remove();
     html.Url.revokeObjectUrl(url);
   }
-
 
   Future<void> guardar() async {
     if (!registroKey.currentState!.validate()) return;
@@ -91,9 +87,9 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
     if (!mounted) return;
     setState(() => guardando = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Guardado')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Guardado')));
     Navigator.pop(context);
   }
 
@@ -179,7 +175,8 @@ class _FormularioRegistroState extends State<FormularioRegistro> {
                     onPressed: guardando ? null : () => guardar(),
                     icon: guardando
                         ? const SizedBox(
-                            width: 18, height: 18,
+                            width: 18,
+                            height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2.2),
                           )
                         : const Icon(Icons.save_outlined),

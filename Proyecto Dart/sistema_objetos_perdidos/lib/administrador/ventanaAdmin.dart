@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class PantallaLogin extends StatefulWidget {
-  const PantallaLogin({super.key});
+class ventanaAdmin extends StatefulWidget {
+  const ventanaAdmin({super.key});
 
   @override
-  State<PantallaLogin> createState() => _PantallaLoginState();
+  State<ventanaAdmin> createState() => _ventanaAdminState();
 }
 
-class _PantallaLoginState extends State<PantallaLogin>
+class _ventanaAdminState extends State<ventanaAdmin>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 

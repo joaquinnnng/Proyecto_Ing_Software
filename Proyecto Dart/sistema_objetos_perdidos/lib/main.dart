@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sistema_objetos_perdidos/botones.dart';
+import 'package:sistema_objetos_perdidos/login/pantalla_login.dart';
 
 void main() {
   runApp(const MainApp());
@@ -15,7 +15,7 @@ class MainApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: Text('Inicio'), backgroundColor: Colors.blue),
 
-        body: MainButtons(),
+        body: PantallaLogin(),
       ),
     );
   }
