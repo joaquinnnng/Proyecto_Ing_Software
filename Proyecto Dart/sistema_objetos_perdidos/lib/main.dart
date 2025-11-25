@@ -13,8 +13,6 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: 'Prototype',
       home: Scaffold(
-        appBar: AppBar(title: Text('Inicio'), backgroundColor: Colors.blue),
-
         body: PantallaLogin(),
       ),
     );

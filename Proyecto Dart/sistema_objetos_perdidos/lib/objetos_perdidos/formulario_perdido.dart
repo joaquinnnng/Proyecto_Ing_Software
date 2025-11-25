@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
+
+import 'package:sistema_objetos_perdidos/objetos_perdidos/reporte_modelo.dart';
 
 class RegistroPage extends StatefulWidget {
   const RegistroPage({super.key});
@@ -98,41 +102,32 @@ class _RegistroPageState extends State<RegistroPage> {
   }
 
   Future<void> _saveReport() async {
-    // 1. Validar el formulario
     if (formularioKey.currentState!.validate()) {
-      // 2. Recopilar y formatear la información en un solo string
-      final String category = selectedCategory!;
-      final String lugar = lugarController.text.trim();
-      final String date = dateController.text;
-      final String timeStr = timeController.text;
-      final String description = descriptionController.text.trim();
+      
+      //CREAR EL OBJETO MODELO
+      final nuevoReporte = ReporteModelo(
+        id: DateTime.now().millisecondsSinceEpoch.toString(), // ID único basado en la hora
+        tipo: "PERDIDO", // <--- IMPORTANTE: Identificador para el admin
+        titulo: "${selectedCategory!} en ${lugarController.text}",
+        categoria: selectedCategory!,
+        lugar: lugarController.text.trim(),
+        fecha: "${dateController.text} ${timeController.text}",
+        descripcion: descriptionController.text.trim(),
+      );
 
-      // Formato del string: [Categoría] - Encontrado en Lugar el Fecha a las Hora. Descripción: Detalle.
-      final String newReportSummary =
-          '[$category] - Perdido en $lugar el $date a las $timeStr. Descripción: $description';
-
-      // 3. Obtener la instancia de SharedPreferences
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      
+      // Obtenemos la lista actual
+      List<String> reportesGuardados = prefs.getStringList('reportes_data_v2') ?? [];
 
-      // Obtener la lista existente (o una lista vacía si es la primera vez)
-      List<String> reportesGuardados =
-          prefs.getStringList('reportes_guardados') ?? [];
+      reportesGuardados.insert(0, jsonEncode(nuevoReporte.toJson()));
 
-      // Añadir el nuevo reporte al inicio de la lista (para que aparezca primero)
-      reportesGuardados.insert(0, newReportSummary);
+      await prefs.setStringList('reportes_data_v2', reportesGuardados);
 
-      // 4. Guardar la lista actualizada
-      await prefs.setStringList('reportes_guardados', reportesGuardados);
-
-      // 5. Mostrar confirmación y cerrar la página
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Objeto perdido registrado y guardado en historial!'),
-            backgroundColor: Colors.blue,
-          ),
+          const SnackBar(content: Text('Aviso enviado al Administrador')),
         );
-        // Regresa a la pantalla anterior para ver el historial actualizado
         Navigator.of(context).pop();
       }
     }

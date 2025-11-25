@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'reporte_modelo.dart'; // Importa tu modelo
 
 class HistorialReportes extends StatefulWidget {
   const HistorialReportes({super.key});
@@ -8,151 +10,140 @@ class HistorialReportes extends StatefulWidget {
   State<HistorialReportes> createState() => _HistorialReportesState();
 }
 
-// Se elimina 'with SingleTickerProviderStateMixin' ya que no se usa el AnimationController
 class _HistorialReportesState extends State<HistorialReportes> {
-  // Estado para guardar los datos cargados y el estado de carga
-  List<String> _reportData = [];
+  List<ReporteModelo> _misReportes = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // Llama a la función asíncrona para cargar los datos
     _loadReportData();
   }
 
-  // Función asíncrona para cargar los datos de SharedPreferences
   Future<void> _loadReportData() async {
-    try {
-      final SharedPreferences database = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> rawData = prefs.getStringList('reportes_data_v2') ?? [];
 
-      // Intentamos obtener la lista de strings bajo la clave 'reportes_guardados'
-      // Si es null, usamos una lista vacía
-      final List<String>? data = database.getStringList('reportes_guardados');
+    List<ReporteModelo> temp = [];
 
-      // Solo actualiza el estado si el widget sigue montado
-      if (mounted) {
-        setState(() {
-          _reportData = data ?? [];
-          _isLoading = false;
-        });
+    for (String item in rawData) {
+      try {
+        final reporte = ReporteModelo.fromJson(jsonDecode(item));
+        // IMPORTANTE: Solo mostramos lo que el usuario reportó como PERDIDO
+        // (Asumimos que "Mis Reportes" son las cosas que yo perdí)
+        if (reporte.tipo == 'PERDIDO') {
+          temp.add(reporte);
+        }
+      } catch (e) {
+        debugPrint("Error al leer reporte: $e");
       }
-    } catch (e) {
-      // Manejo de errores simple en caso de fallo al acceder a SharedPreferences
-      debugPrint('Error al cargar SharedPreferences: $e');
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _misReportes = temp;
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // 1. Mostrar un indicador de carga mientras se obtienen los datos
-    if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    if (_isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Historial de Reportes'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: _reportData.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No hay reportes guardados.',
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
-                  )
-                // 2. GridView.builder con los datos cargados
-                : GridView.builder(
-                    padding: const EdgeInsets.all(16.0),
-                    itemCount:
-                        _reportData.length, // Usar la longitud de los datos
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 1,
-                          crossAxisSpacing: 8.0,
-                          mainAxisSpacing: 8.0,
-                          childAspectRatio: 5,
-                        ),
-                    itemBuilder: (context, index) {
-                      final String reportSummary = _reportData[index];
+      appBar: AppBar(title: const Text('Mis Reportes'), backgroundColor: Colors.blue),
+      body: _misReportes.isEmpty
+          ? const Center(child: Text('No tienes reportes activos'))
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _misReportes.length,
+              itemBuilder: (context, index) {
+                final item = _misReportes[index];
+                
+                // Determinamos si fue encontrado
+                final bool recuperado = item.estado == 'RECUPERADO';
 
-                      return Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            // Acción al tocar la tarjeta (e.g., ver detalles)
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Reporte #$index Seleccionado'),
+                return Card(
+                  // CAMBIO VISUAL: Verde si está recuperado, Blanco si no
+                  color: recuperado ? Colors.green.shade50 : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: recuperado ? Colors.green : Colors.grey.shade300,
+                      width: recuperado ? 2 : 1
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              recuperado ? Icons.check_circle : Icons.warning_amber_rounded,
+                              color: recuperado ? Colors.green : Colors.amber,
+                              size: 30,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                item.titulo,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                               ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
+                            ),
+                            // Etiqueta de estado
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: recuperado ? Colors.green : Colors.amber,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                recuperado ? "¡ENCONTRADO!" : "BUSCANDO...",
+                                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                              ),
+                            )
+                          ],
+                        ),
+                        const Divider(),
+                        Text("Fecha: ${item.fecha}", style: TextStyle(color: Colors.grey[600])),
+                        const SizedBox(height: 8),
+                        Text(item.descripcion),
+                        
+                        // === SECCIÓN DEL MENSAJE DEL ADMIN ===
+                        if (recuperado && item.mensajeAdmin != null) ...[
+                          const SizedBox(height: 15),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade100,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(
-                                  Icons.assignment_turned_in,
-                                  color: Colors.red,
-                                  size: 30,
+                                const Text(
+                                  "INSTRUCCIONES:",
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
                                 ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'Reporte ${index + 1}',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      // Muestra el dato del reporte (resumen)
-                                      Text(
-                                        reportSummary,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const Icon(
-                                  Icons.arrow_forward_ios,
-                                  size: 16,
-                                  color: Colors.grey,
+                                const SizedBox(height: 4),
+                                Text(
+                                  item.mensajeAdmin!, 
+                                  style: TextStyle(color: Colors.green.shade900),
                                 ),
                               ],
                             ),
-                          ),
-                        ),
-                      );
-                    },
+                          )
+                        ]
+                      ],
+                    ),
                   ),
-          ),
-        ],
-      ),
+                );
+              },
+            ),
     );
   }
 }
