@@ -84,7 +84,7 @@ class _PantallaLoginState extends State<PantallaLogin>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inicio de Sesión UDEC'),
-        backgroundColor: Colors.blueGrey.shade800,
+        backgroundColor: Colors.yellow,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -129,7 +129,7 @@ class _PantallaLoginState extends State<PantallaLogin>
                 onPressed: _iniciarSesion,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 15),
-                  backgroundColor: Colors.blueGrey.shade700,
+                  backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
