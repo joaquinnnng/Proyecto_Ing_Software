@@ -12,9 +12,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Prototype',
-      home: Scaffold(
-        body: PantallaLogin(),
-      ),
+      home: Scaffold(body: PantallaLogin()),
     );
   }
 }

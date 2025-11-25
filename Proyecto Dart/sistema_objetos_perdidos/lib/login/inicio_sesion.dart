@@ -4,22 +4,20 @@ import 'package:sistema_objetos_perdidos/login/usuario.dart';
 
 class LoginPersonas {
   final List<Administrador> _administradoresRegistrados = [];
-  final List<UsuarioBasico> _usuariosRegistrados = [];
+  final List<UsuarioBasico> usuariosRegistrados = [];
 
   static const Administrador e1 = Administrador("Link", "Hyrule");
-  static const Administrador e2 = Administrador("Ganon", "Gerudo");
+  static const Administrador e2 = Administrador("Admin@udec.cl", "admin");
 
-  static const UsuarioBasico u1 = UsuarioBasico("Jake el perro", "ay canijote");
-  static const UsuarioBasico u2 = UsuarioBasico("correo@udec.cl", "12345678");
-  static const UsuarioBasico u3 = UsuarioBasico("correo1@udec.cl", "87654321");
+  static const UsuarioBasico u1 = UsuarioBasico("correo@udec.cl", "12345678");
+  static const UsuarioBasico u2 = UsuarioBasico("correo1@udec.cl", "87654321");
 
   LoginPersonas() {
     _administradoresRegistrados.add(e1);
     _administradoresRegistrados.add(e2);
 
-    _usuariosRegistrados.add(u1);
-    _usuariosRegistrados.add(u2);
-    _usuariosRegistrados.add(u3);
+    usuariosRegistrados.add(u1);
+    usuariosRegistrados.add(u2);
   }
 
   bool loginEditor(String nombreUsuario, String contra) {
@@ -36,7 +34,7 @@ class LoginPersonas {
   }
 
   bool loginUsuario(String nombreUsuario, String contra) {
-    final bool esValido = _usuariosRegistrados.any(
+    final bool esValido = usuariosRegistrados.any(
       (usuario) =>
           usuario.nombreUsuario == nombreUsuario && usuario.contra == contra,
     );
@@ -46,5 +44,10 @@ class LoginPersonas {
     }
 
     return esValido;
+  }
+
+  void registrarUsuario(UsuarioBasico nuevoUsuario) {
+    usuariosRegistrados.add(nuevoUsuario);
+    debugPrint("Usuario registrado: ${nuevoUsuario.nombreUsuario}");
   }
 }
