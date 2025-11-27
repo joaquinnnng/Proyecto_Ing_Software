@@ -155,6 +155,7 @@ class _ventanaAdminState extends State<ventanaAdmin> {
       appBar: AppBar(
         title: const Text('Admin: Gestión de Match'),
         backgroundColor: Colors.indigo,
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
