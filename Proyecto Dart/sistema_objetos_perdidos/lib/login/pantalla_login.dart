@@ -4,6 +4,7 @@ import 'package:sistema_objetos_perdidos/objetos_perdidos/botones.dart';
 import 'package:sistema_objetos_perdidos/login/administrador.dart';
 import 'package:sistema_objetos_perdidos/login/usuario.dart';
 import 'package:sistema_objetos_perdidos/login/inicio_sesion.dart';
+import 'dart:math';
 
 class PantallaLogin extends StatefulWidget {
   const PantallaLogin({super.key});
@@ -125,188 +126,269 @@ class _PantallaLoginState extends State<PantallaLogin>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Inicio de Sesión UDEC'),
-        backgroundColor: Colors.yellow,
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              // Icono o Logo
-              Icon(Icons.lock_open, size: 80, color: Colors.blueGrey.shade600),
-              const SizedBox(height: 40),
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final w = constraints.maxWidth;
+      final h = constraints.maxHeight;
 
-              // Campo de Usuario
-              TextField(
-                controller: _usuarioController,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre de Usuario',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
+      // Escalado para mantener proporciones 
+      final double escaladoW = w / 1600;
+      final double escaladoH = h / 900;
+      final double escaladoUsado = min(escaladoW, escaladoH);
+
+      final double wReal = 1600 * escaladoUsado;
+      final double hReal = 900 * escaladoUsado;
+
+      final double offsetX = (w - wReal) / 2.0;
+      final double offsetY = (h - hReal) / 2.0;
+
+      Rect escaladoRectPx({
+        required double left,
+        required double top,
+        required double width,
+        required double height,
+      }) {
+        return Rect.fromLTWH(
+          offsetX + left * escaladoUsado,
+          offsetY + top * escaladoUsado,
+          width * escaladoUsado,
+          height * escaladoUsado,
+        );
+      }
+
+      final Rect userPx   = escaladoRectPx(left: 670, top: 439, width: 270, height: 95);
+      final Rect passPx   = escaladoRectPx(left: 670, top: 548, width: 270, height: 95);
+      final Rect inicioPx = escaladoRectPx(left: 650, top: 656, width: 270, height: 95);
+      final Rect registroPx = escaladoRectPx(left: 573, top: 1, width: 455, height: 899);
+      final Rect crearPx = escaladoRectPx(left: 660, top: 820, width: 283, height: 33);
+      final Rect registroUserPx = escaladoRectPx(left: 666, top: 497, width: 270, height: 95);
+      final Rect registroPassPx = escaladoRectPx(left: 666, top: 596, width: 270, height: 95);
+      final Rect registroinicioPx = escaladoRectPx(left: 666, top: 766, width: 270, height: 95);
+
+      return Scaffold(
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                color: Colors.black,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Image.asset(
+                    'images/fondo1.png',
+                    filterQuality: FilterQuality.none,
+                    isAntiAlias: false,
                   ),
-                  prefixIcon: Icon(Icons.person),
                 ),
               ),
-              const SizedBox(height: 20),
+            ),
 
-              // Campo de Contraseña
-              TextField(
-                controller: _contraController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Contraseña',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                  ),
-                  prefixIcon: Icon(Icons.lock),
+            if (!_isOverlayVisible) ...[
+              //boton de crear usuario
+              Positioned.fromRect(
+                rect: crearPx,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  splashColor: Colors.white24,
+                  onTap: () {
+                    setState(() {
+                      _isOverlayVisible = true;
+                    });
+                  },
+                  child: const SizedBox.expand(),
                 ),
               ),
-              const SizedBox(height: 30),
+              // Nombre de usuario
+              Positioned.fromRect(
+                rect: userPx,
+                child: Container(
+                  color: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    controller: _usuarioController,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                    
 
-              // Botón de Inicio de Sesión
-              ElevatedButton(
-                onPressed: _iniciarSesion,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isCollapsed: true,
+                      hintText: "Nombre de Usuario",
+                      hintStyle: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'INGRESAR',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
 
-              // Mensaje de Error
-              if (_mensajeError != null) ...[
-                const SizedBox(height: 20),
-                Text(
-                  _mensajeError!,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
+              // Contraseña
+              Positioned.fromRect(
+                rect: passPx,
+                child: Container(
+                  color: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    controller: _contraController,
+                    obscureText: true,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isCollapsed: true,
+                      hintText: "Contraseña",
+                      hintStyle: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
                 ),
-              ],
-              if (_isOverlayVisible)
-                GestureDetector(
-                  onTap: _toggleOverlay,
-                  child: Container(
-                    color: Colors.black54.withOpacity(0.7),
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32.0),
-                        child: Container(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.5,
-                            maxHeight: MediaQuery.of(context).size.height * 0.5,
-                          ),
-                          padding: const EdgeInsets.all(20.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(15.0),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 15.0,
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Text(
-                                'CREAR USUARIO UDEC',
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 10),
+              ),
 
-                              TextField(
-                                controller: _usuarionuevoController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Nombre de Usuario',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(10),
-                                    ),
-                                  ),
-                                  prefixIcon: Icon(Icons.person),
-                                ),
-                              ),
-                              const SizedBox(height: 15),
+              //iniciar sesion
+              Positioned.fromRect(
+                rect: inicioPx,
+                child: InkWell(
+                  onTap: _iniciarSesion,
+                  borderRadius: BorderRadius.circular(8),
+                  splashColor: Colors.white24,
+                  child: const SizedBox.expand(),
+                ),
+              ),
 
-                              TextField(
-                                controller: _contranuevaController,
-                                obscureText: true,
-                                decoration: const InputDecoration(
-                                  labelText: 'Contraseña',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(10),
-                                    ),
-                                  ),
-                                  prefixIcon: Icon(Icons.lock),
-                                ),
-                              ),
 
-                              const SizedBox(height: 10),
-
-                              ElevatedButton(
-                                onPressed: _crearUsuario,
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 15,
-                                  ),
-                                  backgroundColor: Colors.blue,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Registrar',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+              if (_mensajeError != null)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 40,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      color: Colors.black.withOpacity(0.6),
+                      child: Text(
+                        _mensajeError!,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
                 ),
             ],
+          
+        
+          if (_isOverlayVisible) ...[
+
+            Positioned.fromRect(
+              rect: registroPx,
+              child: Image.asset(
+                'images/registrousuario.png',
+                fit: BoxFit.fill,
+              ),
+            ),
+
+
+            Positioned.fromRect(
+              rect: registroUserPx,
+              child: Container(
+                color: Colors.transparent,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                alignment: Alignment.center,
+                child: TextField(
+                  controller: _usuarionuevoController,
+                  style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Nombre de Usuario',
+                    hintStyle: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: _toggleOverlay,
-        backgroundColor: Colors.blue,
-        tooltip: "Ingresar nuevo usuario UdeC",
 
-        child: Icon(
-          _isOverlayVisible ? Icons.close : Icons.app_registration,
-          color: Colors.white,
-        ),
+            Positioned.fromRect(
+              rect: registroPassPx,
+              child: Container(
+                color: Colors.transparent,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                alignment: Alignment.center,
+                child:TextField(
+                controller: _contranuevaController,
+                obscureText: true,
+                style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Contraseña',
+                  hintStyle: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                ),
+              ),
+            )     
+          ),
+
+/*              Positioned.fromRect(
+                rect: passPx,
+                child: Container(
+                  color: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    controller: _contraController,
+                    obscureText: true,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isCollapsed: true,
+                      hintText: "Contraseña",
+                      hintStyle: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),*/ 
+
+
+            Positioned.fromRect(
+              rect: registroinicioPx,
+              child: InkWell(
+                onTap: _crearUsuario,
+              ),
+            ),
+          ]
+        ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
-  }
+    },
+  );
+}
 }

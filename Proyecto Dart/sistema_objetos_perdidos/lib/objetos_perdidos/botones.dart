@@ -3,69 +3,140 @@ import 'package:sistema_objetos_perdidos/login/pantalla_login.dart';
 import 'package:sistema_objetos_perdidos/objetos_perdidos/formulario_perdido.dart';
 import 'package:sistema_objetos_perdidos/objetos_perdidos/formulario_encontrado.dart';
 import 'package:sistema_objetos_perdidos/objetos_perdidos/historial_reportes.dart';
+import 'dart:math';
 
 class MainButtons extends StatelessWidget {
   const MainButtons({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+
+      return LayoutBuilder(
+    builder: (context, constraints) {
+      final w = constraints.maxWidth;
+      final h = constraints.maxHeight;
+
+      // Escalado para mantener proporciones 1335x1000
+      final double escaladoW = w / 1600;
+      final double escaladoH = h / 900;
+      final double escaladoUsado = min(escaladoW, escaladoH);
+
+      final double wReal = 1600 * escaladoUsado;
+      final double hReal = 900 * escaladoUsado;
+
+      final double offsetX = (w - wReal) / 2.0;
+      final double offsetY = (h - hReal) / 2.0;
+
+      Rect escaladoRectPx({
+        required double left,
+        required double top,
+        required double width,
+        required double height,
+      }) {
+        return Rect.fromLTWH(
+          offsetX + left * escaladoUsado,
+          offsetY + top * escaladoUsado,
+          width * escaladoUsado,
+          height * escaladoUsado,
+        );
+      }
+
+      final Rect perdidosPx = escaladoRectPx(left: 310, top: 240, width: 980, height: 126);
+      final Rect encontradosPx = escaladoRectPx(left: 310, top: 412, width: 980, height: 126);
+      final Rect reportesPx = escaladoRectPx(left: 310, top: 582, width: 980, height: 126);
+      final Rect salirPx = escaladoRectPx(left: 310, top: 745, width: 980, height: 126);
+
+    return Scaffold(
+      body: Stack(
         children: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const RegistroPage()),
-              ); // redirecciona
-            },
-            child: const Text('Registrar Objeto Perdido'),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const EncontradoPage()),
-              );
-            },
-            child: const Text('Registrar Objeto Encontrado'),
-          ),
-          const SizedBox(height: 16),
 
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HistorialReportes(),
+          Positioned.fill(
+            child: Container(
+              color: Colors.black,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Image.asset(
+                  'images/fondo2.png',
+                  filterQuality: FilterQuality.none,
+                  isAntiAlias: false,
                 ),
-              );
-            },
-            child: const Text('Mis Reportes'),
+              ),
+            ),
           ),
 
-          const SizedBox(height: 40),
 
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-             backgroundColor: Colors.red.shade100, // Un rojo suave
-             foregroundColor: Colors.red.shade900, // Texto rojo oscuro
-           ),
-           icon: const Icon(Icons.logout),
-           label: const Text('Cerrar Sesión'),
-          onPressed: () {
+
     
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const PantallaLogin()),
-            (Route<dynamic> route) => false,
-    );
-  },
-),
-        ],
-      ),
-    );
-  }
+          //boton para reportar objeto perdido
+          Positioned.fromRect(
+            rect: perdidosPx,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RegistroPage()),
+                );
+              },
+              splashColor: Colors.white24,
+              borderRadius: BorderRadius.circular(8),
+              child: const SizedBox.expand(),
+            ),
+          ),
+
+          //boton para reportar objeto encontrado
+          Positioned.fromRect(
+            rect: encontradosPx,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const EncontradoPage()),
+                );
+              },
+              splashColor: Colors.white24,
+              borderRadius: BorderRadius.circular(8),
+              child: const SizedBox.expand(),
+            ),
+          ),
+          
+          //boton para ver los reportes
+          Positioned.fromRect(
+            rect: reportesPx,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HistorialReportes()),
+                );
+              },
+              splashColor: Colors.white24,
+              borderRadius: BorderRadius.circular(8),
+              child: const SizedBox.expand(),
+            ),
+          ),
+
+          //boton para cerrar sesion
+          Positioned.fromRect(
+            rect: salirPx,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PantallaLogin()),
+
+                );
+              },
+              splashColor: Colors.white24,
+              borderRadius: BorderRadius.circular(8),
+              child: const SizedBox.expand(),
+                  ),
+                ),
+              ],
+            ),
+          );
+       },
+     );
+  }  
 }
+
+
