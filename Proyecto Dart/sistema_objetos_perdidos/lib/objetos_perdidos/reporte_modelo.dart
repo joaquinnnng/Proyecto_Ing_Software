@@ -10,6 +10,7 @@ class ReporteModelo {
   String estado; // "PENDIENTE" o "RECUPERADO"
   String? mensajeAdmin; 
   String? imagenBase64;
+  String? autor;
 
   ReporteModelo({
     required this.id,
@@ -22,6 +23,7 @@ class ReporteModelo {
     this.estado = 'PENDIENTE',
     this.mensajeAdmin,
     this.imagenBase64,
+    this.autor,
   });
 
   Map<String, dynamic> toJson() => {
@@ -35,6 +37,7 @@ class ReporteModelo {
         'estado': estado,
         'mensajeAdmin': mensajeAdmin,
         'imagenUrl': imagenBase64,
+        'autor': autor,
       };
 
   factory ReporteModelo.fromJson(Map<String, dynamic> json) {
@@ -49,6 +52,7 @@ class ReporteModelo {
       estado: json['estado'] ?? 'PENDIENTE',
       mensajeAdmin: json['mensajeAdmin'],
       imagenBase64: json['imagenUrl'],
+      autor: json['autor'] ?? 'Desconocido',
     );
   }
 }

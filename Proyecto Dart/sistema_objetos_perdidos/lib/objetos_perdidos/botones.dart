@@ -6,7 +6,9 @@ import 'package:sistema_objetos_perdidos/objetos_perdidos/historial_reportes.dar
 import 'dart:math';
 
 class MainButtons extends StatelessWidget {
-  const MainButtons({super.key});
+  
+  final String usuarioLogueado; 
+  const MainButtons({super.key, required this.usuarioLogueado});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +18,7 @@ class MainButtons extends StatelessWidget {
       final w = constraints.maxWidth;
       final h = constraints.maxHeight;
 
-      // Escalado para mantener proporciones 1335x1000
+      //Escalado para mantener proporciones 1335x1000
       final double escaladoW = w / 1600;
       final double escaladoH = h / 900;
       final double escaladoUsado = min(escaladoW, escaladoH);
@@ -64,8 +66,14 @@ class MainButtons extends StatelessWidget {
             ),
           ),
 
-
-
+          Positioned(
+            top: 40, 
+            left: 20,
+            child: Text(
+              "Hola: $usuarioLogueado", 
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
     
           //boton para reportar objeto perdido
           Positioned.fromRect(
@@ -74,7 +82,9 @@ class MainButtons extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const RegistroPage()),
+                  MaterialPageRoute(
+                    builder: (context) => RegistroPage(usuarioEmail: usuarioLogueado)
+                  ),
                 );
               },
               splashColor: Colors.white24,
@@ -90,7 +100,9 @@ class MainButtons extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const EncontradoPage()),
+                  MaterialPageRoute(
+                    builder: (context) => EncontradoPage(usuarioEmail: usuarioLogueado)
+                  ),
                 );
               },
               splashColor: Colors.white24,
@@ -120,10 +132,10 @@ class MainButtons extends StatelessWidget {
             rect: salirPx,
             child: InkWell(
               onTap: () {
-                Navigator.push(
+                Navigator.pushAndRemoveUntil( // Usamos pushAndRemoveUntil mejor
                   context,
                   MaterialPageRoute(builder: (context) => const PantallaLogin()),
-
+                  (Route<dynamic> route) => false,
                 );
               },
               splashColor: Colors.white24,

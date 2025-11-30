@@ -52,7 +52,7 @@ class _PantallaLoginState extends State<PantallaLogin>
   void _abrirVentanaUsuario(UsuarioBasico usuario) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => MainButtons() /*usuario: usuario*/,
+        builder: (context) => MainButtons(usuarioLogueado: usuario.nombreUsuario),
       ),
     );
   }

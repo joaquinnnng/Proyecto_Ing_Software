@@ -8,7 +8,7 @@ import 'dart:typed_data';
 import 'package:sistema_objetos_perdidos/objetos_perdidos/reporte_modelo.dart';
 
 class EncontradoPage extends StatefulWidget {
-  const EncontradoPage({super.key});
+  const EncontradoPage({super.key, required String usuarioEmail});
 
   @override
   State<EncontradoPage> createState() => _EncontradoPageState();
