@@ -162,7 +162,109 @@ class _ventanaAdminState extends State<ventanaAdmin> {
           overflow: TextOverflow.ellipsis,
         ),
         isThreeLine: true,
-        trailing: isSelected ? Icon(Icons.check_circle, color: color) : null,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min, 
+          children: [
+            //Boton de Información
+            IconButton(
+              icon: const Icon(Icons.visibility, color: Colors.grey),
+              tooltip: "Ver detalles completos",
+              onPressed: () => _mostrarDetalle(report),
+            ),
+            if (isSelected) 
+              Icon(Icons.check_circle, color: color),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _mostrarDetalle(ReporteModelo reporte) {
+    final Uint8List? imageBytes = _imageFromBase64(reporte.imagenBase64);
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(reporte.titulo),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (imageBytes != null)
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 15),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.memory(
+                          imageBytes,
+                          fit: BoxFit.contain, //muestra la foto entera
+                          height: 250, 
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Icon(Icons.image_not_supported, size: 60, color: Colors.grey),
+                    ),
+                  ),
+
+                const Divider(),
+                _detalleTexto("Categoría:", reporte.categoria),
+                _detalleTexto("Lugar:", reporte.lugar),
+                _detalleTexto("Fecha/Hora:", reporte.fecha),
+                const SizedBox(height: 10),
+                const Text("Descripción:", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(reporte.descripcion, style: const TextStyle(fontStyle: FontStyle.italic)),
+                const SizedBox(height: 10),
+                const Divider(),
+                //El Correo del Autor
+                Row(
+                  children: [
+                    const Icon(Icons.person, color: Colors.indigo),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "Reportado por:\n${reporte.autor ?? 'Anónimo'}",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text("Cerrar"),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _detalleTexto(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4.0),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(color: Colors.black87),
+          children: [
+            TextSpan(text: "$label ", style: const TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: value),
+          ],
+        ),
       ),
     );
   }

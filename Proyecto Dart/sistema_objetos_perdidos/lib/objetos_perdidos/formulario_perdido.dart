@@ -8,7 +8,8 @@ import 'dart:typed_data';
 import 'package:sistema_objetos_perdidos/objetos_perdidos/reporte_modelo.dart';
 
 class RegistroPage extends StatefulWidget {
-  const RegistroPage({super.key});
+  final String usuarioEmail;
+  const RegistroPage({super.key, required this.usuarioEmail});
 
   @override
   State<RegistroPage> createState() => _RegistroPageState();
@@ -126,6 +127,7 @@ class _RegistroPageState extends State<RegistroPage> {
         fecha: "${dateController.text} ${timeController.text}",
         descripcion: descriptionController.text.trim(),
         imagenBase64: imagenBase64,
+        autor: widget.usuarioEmail
         
       );
 
