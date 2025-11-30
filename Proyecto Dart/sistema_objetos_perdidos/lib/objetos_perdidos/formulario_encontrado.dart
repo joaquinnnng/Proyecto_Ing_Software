@@ -105,6 +105,11 @@ class _EncontradoPageState extends State<EncontradoPage> {
     if (formularioKey.currentState!.validate()) {
       
       // CREAR EL OBJETO MODELO
+      String? imagenBase64;
+      if (imagebytes.isNotEmpty) {
+        imagenBase64 = base64Encode(imagebytes);
+      }
+
       final nuevoReporte = ReporteModelo(
         id: DateTime.now().millisecondsSinceEpoch.toString(), // ID único basado en la hora
         tipo: "ENCONTRADO", 
@@ -113,6 +118,7 @@ class _EncontradoPageState extends State<EncontradoPage> {
         lugar: lugarController.text.trim(),
         fecha: "${dateController.text} ${timeController.text}",
         descripcion: descriptionController.text.trim(),
+        imagenBase64: imagenBase64,
       );
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();

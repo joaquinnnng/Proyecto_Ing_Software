@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sistema_objetos_perdidos/login/pantalla_login.dart';
 import 'package:sistema_objetos_perdidos/objetos_perdidos/reporte_modelo.dart';
 import 'dart:convert';
-import 'package:sistema_objetos_perdidos/objetos_perdidos/reporte_modelo.dart';
+import 'dart:typed_data';
 
 class ventanaAdmin extends StatefulWidget {
   const ventanaAdmin({super.key});
@@ -27,7 +27,16 @@ class _ventanaAdminState extends State<ventanaAdmin> {
     _cargarDatosDelSistema();
   }
 
-  // --- LÓGICA DE CARGA DE DATOS ---
+  Uint8List? _imageFromBase64(String? b64) {
+    if (b64 == null) return null;
+    try {
+      return base64Decode(b64);
+    } catch (e) {
+      debugPrint('Error al decodificar imagen base64: $e');
+      return null;
+    }
+  }
+
   Future<void> _cargarDatosDelSistema() async {
     final prefs = await SharedPreferences.getInstance();
     // Leemos la misma Key que usamos en el formulario
@@ -58,8 +67,6 @@ class _ventanaAdminState extends State<ventanaAdmin> {
       });
     }
   }
-
- // En ventanaAdmin.dart, reemplaza la función _matchReports por esta:
 
   Future<void> _matchReports() async {
     if (_selectedPerdido != null && _selectedEncontrado != null) {
@@ -118,6 +125,7 @@ class _ventanaAdminState extends State<ventanaAdmin> {
     required ValueChanged<ReporteModelo> onTap,
     required Color color,
   }) {
+    final Uint8List? imageBytes = _imageFromBase64(report.imagenBase64);
     return Card(
       elevation: isSelected ? 8 : 2,
       color: isSelected ? color.withOpacity(0.1) : null,
@@ -130,6 +138,20 @@ class _ventanaAdminState extends State<ventanaAdmin> {
       ),
       child: ListTile(
         onTap: () => onTap(report),
+        leading: imageBytes != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.memory(
+                  imageBytes,
+                  width: 56,
+                  height: 56,
+                  fit: BoxFit.cover,
+                ),
+              )
+            : CircleAvatar(
+                backgroundColor: color.withOpacity(0.15),
+                child: Icon(Icons.image_outlined, color: color),
+              ),
         title: Text(
           report.titulo,
           style: TextStyle(fontWeight: FontWeight.bold, color: color),

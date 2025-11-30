@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'reporte_modelo.dart'; // Importa tu modelo
-
+import 'reporte_modelo.dart'; 
+import 'dart:typed_data';
 class HistorialReportes extends StatefulWidget {
   const HistorialReportes({super.key});
 
@@ -13,6 +13,17 @@ class HistorialReportes extends StatefulWidget {
 class _HistorialReportesState extends State<HistorialReportes> {
   List<ReporteModelo> _misReportes = [];
   bool _isLoading = true;
+
+Uint8List? _imageFromBase64(String? b64) {
+    if (b64 == null) return null;
+    try {
+      return base64Decode(b64);
+    } catch (e) {
+      debugPrint('Error decodificando imagen: $e');
+      return null;
+    }
+  }
+
 
   @override
   void initState() {
@@ -64,6 +75,9 @@ class _HistorialReportesState extends State<HistorialReportes> {
                 // Determinamos si fue encontrado
                 final bool recuperado = item.estado == 'RECUPERADO';
 
+                // decodificamos la imagen (si existe)
+               final Uint8List? imageBytes = _imageFromBase64(item.imagenBase64);
+
                 return Card(
                   // CAMBIO VISUAL: Verde si está recuperado, Blanco si no
                   color: recuperado ? Colors.green.shade50 : Colors.white,
@@ -93,6 +107,22 @@ class _HistorialReportesState extends State<HistorialReportes> {
                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                               ),
                             ),
+                            if (imageBytes != null)
+                              ClipOval(
+                               child: Image.memory(
+                                  imageBytes,
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            else
+                              Icon(
+                                recuperado ? Icons.check_circle : Icons.warning_amber_rounded,
+                                color: recuperado ? Colors.green : Colors.amber,
+                                size: 30,
+                              ),
+                            const SizedBox(width: 10),
                             // Etiqueta de estado
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

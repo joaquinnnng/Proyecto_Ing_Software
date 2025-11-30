@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
@@ -53,6 +53,12 @@ class _RegistroPageState extends State<RegistroPage> {
     super.dispose();
   }
 
+
+  Future<String> convertirImagenABase64(File imagen) async {
+  final bytes = await imagen.readAsBytes();
+  return base64Encode(bytes);
+}
+
   Future<void> datePicker() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -100,9 +106,15 @@ class _RegistroPageState extends State<RegistroPage> {
       });
     }
   }
+  
 
   Future<void> _saveReport() async {
     if (formularioKey.currentState!.validate()) {
+
+      String? imagenBase64;
+      if (imagebytes.isNotEmpty) {
+        imagenBase64 = base64Encode(imagebytes);
+      }
       
       //CREAR EL OBJETO MODELO
       final nuevoReporte = ReporteModelo(
@@ -113,6 +125,8 @@ class _RegistroPageState extends State<RegistroPage> {
         lugar: lugarController.text.trim(),
         fecha: "${dateController.text} ${timeController.text}",
         descripcion: descriptionController.text.trim(),
+        imagenBase64: imagenBase64,
+        
       );
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
